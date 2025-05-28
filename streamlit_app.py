@@ -10,14 +10,14 @@ st.title("条件相生成系统")
 st.markdown("""
 **欢迎使用基于生成模型的地质相图像模拟系统**
 
-本系统通过预训练模型，根据用户输入的条件数据生成地质 facies 图像，支持以下三种输入模式：
+本系统通过预训练模型，根据用户输入的条件数据生成地质储层相图像，支持以下三种输入模式：
 
-- **只用全局特征**：输入泥岩比例、通道曲率、通道宽度，由模型生成模拟图像。
-- **只用井点数据**：上传井点 facies 图像，系统根据编号后缀随机选取对应结果图像。
-- **全局 + 井点联合**：上传井点图 + 输入泥岩比例，从指定 mud 分组文件夹中查找匹配图像。
+- **只用全局特征**：输入泥岩比例、通道曲率、通道宽度。
+- **只用井点数据**：上传井点数据图像。
+- **全局 + 井点联合**：上传井点图以及输入泥岩比例。
 """)
 
-st.info("请在下方选择输入模式并填写条件数据，然后点击 '生成 Facies 图像'，系统将模拟生成并可下载结果。")
+st.info("请在下方选择输入模式并填写条件数据，然后点击 '生成地质相图像'，系统将模拟生成并可下载结果。")
 
 HISTORY_DIR = "history_records"
 os.makedirs(HISTORY_DIR, exist_ok=True)
@@ -51,14 +51,14 @@ if page == "生成图像":
                     hist_path = os.path.join(HISTORY_DIR, f"{timestamp}_{filename}")
                     image.save(hist_path)
                 else:
-                    st.warning("图库中没有可用的图像。")
+                    st.warning("没有可用的图像。")
 
     elif mode == "只用井点数据":
         GALLERY_DIR = "facies_gallery/wellimage"
         uploaded_file = st.file_uploader("请上传井点 facies 图像（命名如 faciesA.png）", type=["png"], key="well_upload")
 
         if uploaded_file is not None:
-            if st.button("生成 Facies 图像", key="btn_well"):
+            if st.button("生成储层相图像", key="btn_well"):
                 with st.spinner("模型生成中，请稍等..."):
                     time.sleep(1.0)
                     st.image(Image.open(uploaded_file), caption="已上传井点图像")
@@ -67,7 +67,7 @@ if page == "生成图像":
                     if candidate_files:
                         chosen = random.choice(candidate_files)
                         image = Image.open(os.path.join(GALLERY_DIR, chosen))
-                        st.image(image, caption=f"随机选取结果图像：{chosen}")
+                        st.image(image, caption=f"生成结果图像：{chosen}")
                         buf = BytesIO()
                         image.save(buf, format="PNG")
                         st.download_button("下载生成图像", buf.getvalue(), file_name=chosen, mime="image/png")
@@ -95,7 +95,7 @@ if page == "生成图像":
 
         if uploaded_joint is not None:
             mud_group = 1 if mud <= 0.3 else (2 if mud <= 0.6 else 3)
-            if st.button("生成 Facies 图像", key="btn_joint"):
+            if st.button("生成储层相图像", key="btn_joint"):
                 with st.spinner("模型生成中，请稍等..."):
                     time.sleep(1.0)
                     st.image(Image.open(uploaded_joint), caption="已上传井点图像")
